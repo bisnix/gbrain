@@ -31,12 +31,14 @@ fi\n\
 if [ ! -f /brain-data/.gbrain/.import-done ]; then\n\
     echo ">>> First run: initializing GBrain..."\n\
     rm -rf /brain-data/.gbrain\n\
-    gbrain init --pglite --no-embedding\n\
 \n\
     if [ -n "$OPENAI_API_KEY" ]; then\n\
-        echo ">>> Configuring OpenAI embedding..."\n\
-        gbrain config set embedding_model "openai:text-embedding-3-small"\n\
+        echo ">>> Init with OpenAI embedding..."\n\
+        gbrain init --pglite --embedding-model openai:text-embedding-3-small\n\
+    else\n\
+        gbrain init --pglite --no-embedding\n\
     fi\n\
+\n\
     gbrain config set search.mode balanced\n\
     gbrain config set link_resolution.global_basename true\n\
 \n\
