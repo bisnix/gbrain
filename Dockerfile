@@ -18,18 +18,32 @@ EXPOSE 3131
 
 RUN echo '#!/bin/bash\n\
 set -e\n\
-mkdir -p /brain-data/.gbrain\n\
 export HOME=/brain-data\n\
 \n\
+# --- Clone Obsidian vault from GitHub ---\n\
+if [ ! -f /vault/.git/config ]; then\n\
+    echo ">>> Cloning Obsidian vault..."\n\
+    git clone https://oauth2:${GITHUB_TOKEN}@github.com/bisnix/obsvault.git /vault\n\
+else\n\
+    echo ">>> Vault already exists, pulling latest..."\n\
+    cd /vault && git pull || true\n\
+fi\n\
+\n\
+# --- Init GBrain if first run ---\n\
 if [ ! -f /brain-data/.gbrain/config.json ]; then\n\
     echo ">>> First run: initializing GBrain..."\n\
     gbrain init --pglite --no-embedding\n\
+\n\
     if [ -n "$OPENAI_API_KEY" ]; then\n\
         echo ">>> Configuring OpenAI embedding..."\n\
         gbrain config set embedding_model "openai:text-embedding-3-small"\n\
     fi\n\
     gbrain config set search.mode balanced\n\
     gbrain config set link_resolution.global_basename true\n\
+\n\
+    echo ">>> Importing vault into GBrain..."\n\
+    gbrain import /vault\n\
+\n\
     echo ">>> GBrain initialized."\n\
 fi\n\
 \n\
