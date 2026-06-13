@@ -3,12 +3,11 @@ FROM oven/bun:1
 RUN apt-get update && apt-get install -y --no-install-recommends git curl \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
-
-RUN git clone --depth 1 --branch master \
-    https://github.com/garrytan/gbrain.git /app/gbrain
-
 WORKDIR /app/gbrain
+
+# Copy dari repo sendiri (hasil fork) — bukan clone dari internet
+COPY . .
+
 RUN bun install && bun link
 
 RUN mkdir -p /vault /brain-data
