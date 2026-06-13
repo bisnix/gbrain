@@ -5,7 +5,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends git curl \
 
 WORKDIR /app/gbrain
 
-# Copy dari repo sendiri (hasil fork) — bukan clone dari internet
 COPY . .
 
 RUN bun install && bun link
@@ -24,12 +23,13 @@ export HOME=/brain-data\n\
 \n\
 if [ ! -f /brain-data/.gbrain/config.json ]; then\n\
     echo ">>> First run: initializing GBrain..."\n\
-    echo "" | gbrain init || true\n\
+    gbrain init --pglite --no-embedding\n\
     if [ -n "$OPENAI_API_KEY" ]; then\n\
-        gbrain config set embedding_model "openai:text-embedding-3-small" || true\n\
+        echo ">>> Configuring OpenAI embedding..."\n\
+        gbrain config set embedding_model "openai:text-embedding-3-small"\n\
     fi\n\
-    gbrain config set search.mode balanced || true\n\
-    gbrain config set link_resolution.global_basename true || true\n\
+    gbrain config set search.mode balanced\n\
+    gbrain config set link_resolution.global_basename true\n\
     echo ">>> GBrain initialized."\n\
 fi\n\
 \n\
