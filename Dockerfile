@@ -20,7 +20,6 @@ RUN echo '#!/bin/bash\n\
 set -e\n\
 export HOME=/brain-data\n\
 \n\
-# --- Clone Obsidian vault from GitHub ---\n\
 if [ ! -f /vault/.git/config ]; then\n\
     echo ">>> Cloning Obsidian vault..."\n\
     git clone https://oauth2:${GITHUB_TOKEN}@github.com/bisnix/obsvault.git /vault\n\
@@ -29,9 +28,9 @@ else\n\
     cd /vault && git pull || true\n\
 fi\n\
 \n\
-# --- Init GBrain if first run ---\n\
-if [ ! -f /brain-data/.gbrain/config.json ]; then\n\
+if [ ! -f /brain-data/.gbrain/.import-done ]; then\n\
     echo ">>> First run: initializing GBrain..."\n\
+    rm -rf /brain-data/.gbrain\n\
     gbrain init --pglite --no-embedding\n\
 \n\
     if [ -n "$OPENAI_API_KEY" ]; then\n\
@@ -41,10 +40,16 @@ if [ ! -f /brain-data/.gbrain/config.json ]; then\n\
     gbrain config set search.mode balanced\n\
     gbrain config set link_resolution.global_basename true\n\
 \n\
-    echo ">>> Importing vault into GBrain..."\n\
-    gbrain import /vault\n\
+    echo ">>> Importing vault..."\n\
+    gbrain import /vault --no-embed\n\
 \n\
-    echo ">>> GBrain initialized."\n\
+    if [ -n "$OPENAI_API_KEY" ]; then\n\
+        echo ">>> Generating embeddings..."\n\
+        gbrain embed --all\n\
+    fi\n\
+\n\
+    touch /brain-data/.gbrain/.import-done\n\
+    echo ">>> GBrain initialized and vault imported."\n\
 fi\n\
 \n\
 echo ">>> GBrain MCP server starting on port 3131..."\n\
