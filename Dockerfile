@@ -54,8 +54,8 @@ if [ ! -f /brain-data/.gbrain/.import-done ]; then\n\
     echo ">>> GBrain initialized and vault imported."\n\
 fi\n\
 \n\
-echo ">>> GBrain MCP server starting on port 3131..."\n\
-exec gbrain serve --http --port 3131 --host 0.0.0.0\n\
+echo ">>> GBrain starting on port 3131 (bind 0.0.0.0)..."\n\
+exec gbrain serve --http --port 3131 --bind 0.0.0.0 --host 0.0.0.0\n\
 ' > /entrypoint.sh && chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
