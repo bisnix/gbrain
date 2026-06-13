@@ -39,8 +39,8 @@ if [ ! -f /brain-data/.gbrain/.import-done ]; then\n\
         gbrain init --pglite --no-embedding\n\
     fi\n\
 \n\
-    gbrain config set search.mode balanced\n\
-    gbrain config set link_resolution.global_basename true\n\
+    gbrain config set search.mode balanced || true\n\
+    gbrain config set link_resolution.global_basename true || true\n\
 \n\
     echo ">>> Importing vault..."\n\
     gbrain import /vault --no-embed\n\
