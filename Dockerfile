@@ -1,0 +1,41 @@
+FROM oven/bun:1
+
+RUN apt-get update && apt-get install -y --no-install-recommends git curl \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+RUN git clone --depth 1 --branch master \
+    https://github.com/garrytan/gbrain.git /app/gbrain
+
+WORKDIR /app/gbrain
+RUN bun install && bun link
+
+RUN mkdir -p /vault /brain-data
+
+ENV GBRAIN_HOME=/brain-data
+ENV HOME=/brain-data
+
+EXPOSE 3131
+
+RUN echo '#!/bin/bash\n\
+set -e\n\
+mkdir -p /brain-data/.gbrain\n\
+export HOME=/brain-data\n\
+\n\
+if [ ! -f /brain-data/.gbrain/config.json ]; then\n\
+    echo ">>> First run: initializing GBrain..."\n\
+    echo "" | gbrain init || true\n\
+    if [ -n "$OPENAI_API_KEY" ]; then\n\
+        gbrain config set embedding_model "openai:text-embedding-3-small" || true\n\
+    fi\n\
+    gbrain config set search.mode balanced || true\n\
+    gbrain config set link_resolution.global_basename true || true\n\
+    echo ">>> GBrain initialized."\n\
+fi\n\
+\n\
+echo ">>> GBrain MCP server starting on port 3131..."\n\
+exec gbrain serve --http --port 3131 --host 0.0.0.0\n\
+' > /entrypoint.sh && chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
